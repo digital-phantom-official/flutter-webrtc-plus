@@ -177,6 +177,12 @@ class Helper {
     return isSupported ?? false;
   }
 
+  // Set Frames Per Second value
+  // It will affect how frequent to check and apply the virtual background to a frame.
+  static Future<void> setFPS(int fps) async {
+    WebRTC.invokeMethod("setFPS", {"fps": fps});
+  }
+
   // Enable Virtual Background with the provided background image and threshold confidence level.
   // The backgroundImage is expected to be in Uint8List format representing the image bytes.
   // The thresholdConfidence is an optional parameter with a default value of 0.7, which represents
