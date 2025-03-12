@@ -38,7 +38,7 @@ class FlutterRTCVideoPipe {
     private var sink: VideoSink? = null
     private val bitmapMap = HashMap<Long, CacheFrame>()
     private var lastProcessedFrameTime: Long = 0
-    private val targetFrameInterval: Long = 1000 / 24 // 1000 milliseconds divided by 24 FPS
+    private var targetFrameInterval: Long = 1000 / 24 // 1000 milliseconds divided by 24 FPS
     private var virtualBackground: FlutterRTCVirtualBackground? = null
     private var beautyFilters: FlutterRTCBeautyFilters? = null
 
@@ -70,10 +70,12 @@ class FlutterRTCVideoPipe {
         useGpuTask.continueWith { resultUseGpu ->
             if (resultUseGpu.result) {
                 isGpuSupported = true
-                TfLite.initialize(context,
+                TfLite.initialize(
+                    context,
                     TfLiteInitializationOptions.builder()
                         .setEnableGpuDelegateSupport(resultUseGpu.result)
-                        .build())
+                        .build()
+                )
             }
         }
 
@@ -106,7 +108,11 @@ class FlutterRTCVideoPipe {
                     )
 
                     // Create the segmented bitmap from the color array
-                    val segmentedBitmap = virtualBackground?.createBitmapFromColors(colors!!, bitmap.width, bitmap.height)
+                    val segmentedBitmap = virtualBackground?.createBitmapFromColors(
+                        colors!!,
+                        bitmap.width,
+                        bitmap.height
+                    )
 
                     if (backgroundBitmap == null) {
                         // If the background bitmap is null, return without further processing
@@ -114,7 +120,10 @@ class FlutterRTCVideoPipe {
                     }
 
                     // Draw the segmented bitmap on top of the background for human segments
-                    val outputBitmap = virtualBackground?.drawSegmentedBackground(segmentedBitmap, backgroundBitmap)
+                    val outputBitmap = virtualBackground?.drawSegmentedBackground(
+                        segmentedBitmap,
+                        backgroundBitmap
+                    )
 
                     if (outputBitmap != null) {
                         emitBitmapOnFrame(outputBitmap)
@@ -136,6 +145,10 @@ class FlutterRTCVideoPipe {
         this.backgroundBitmap = null
         this.virtualBackground = null
         resetBackground()
+    }
+
+    fun setFPS(fps: Int) {
+        targetFrameInterval = (1000 / fps).toLong()
     }
 
     fun resetBackground() {
@@ -262,7 +275,15 @@ class FlutterRTCVideoPipe {
         var outputBitmap = bitmap.copy(bitmap.config, true)
 
         val matrix = Matrix()
-        outputBitmap = Bitmap.createBitmap(outputBitmap, 0, 0, outputBitmap.width, outputBitmap.height, matrix, true)
+        outputBitmap = Bitmap.createBitmap(
+            outputBitmap,
+            0,
+            0,
+            outputBitmap.width,
+            outputBitmap.height,
+            matrix,
+            true
+        )
 
         val frame = convertBitmapToVideoFrame(outputBitmap)
 
